@@ -1,0 +1,9 @@
+.nav-link:hover {
+  background-color: #e0e0e0;
+  border-radius: 8px;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: white;
+}
