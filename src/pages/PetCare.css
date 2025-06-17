@@ -1,0 +1,196 @@
+/* General Cuteness */
+body {
+    background-color: #f8f9fa; /* Light background */
+}
+
+.pet-care-container {
+    /* font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif; A bit playful font */
+    color: #343a40;
+    font-family: 'Open Sans', Arial, sans-serif; /* Default body font */
+}
+
+.cute-heading {
+    color: #ff69b4 !important; /* Pink for cuteness */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    animation: bounceIn 1s ease-out; /* Simple entry animation */
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.cute-label {
+    font-weight: bold;
+    color: #6c757d !important;
+}
+
+.cute-select,
+.cute-input {
+    border-radius: 0.75rem !important; /* More rounded */
+    border: 1px solid #ffe0f0; /* Soft pink border */
+    transition: all 0.3s ease-in-out;
+}
+
+.cute-select:focus,
+.cute-input:focus {
+    border-color: #ff99cc; /* Brighter pink on focus */
+    box-shadow: 0 0 0 0.25rem rgba(255, 105, 180, 0.25); /* Pink shadow */
+}
+
+.cute-card {
+    border-radius: 1.5rem !important; /* Super rounded cards */
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.08), -8px -8px 15px rgba(255, 255, 255, 0.7); /* Subtle neumorphism effect */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cute-card:hover {
+    transform: translateY(-5px); /* Lift on hover */
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.12), -10px -10px 20px rgba(255, 255, 255, 0.8);
+}
+
+.cute-card-title {
+    color: #6a0571 !important; /* A deeper, playful purple */
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.cute-text {
+    color: #495057;
+    line-height: 1.6;
+}
+
+.cute-divider {
+    border-top: 2px dashed #ffb3e0; /* Dashed pink divider */
+    margin: 1.5rem 0;
+}
+
+/* Specific button styles for cuteness */
+.cute-btn {
+    border-radius: 2rem !important; /* Pill-shaped buttons */
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.cute-btn:hover {
+    transform: scale(1.05); /* Pop effect on hover */
+}
+
+.btn-warning.cute-btn-manual {
+    background-color: #ffcc00; /* Sunny yellow */
+    border-color: #ffcc00;
+    color: #8b6e00; /* Darker text */
+}
+
+.btn-warning.cute-btn-manual:hover {
+    background-color: #e6b800;
+    border-color: #e6b800;
+}
+
+.btn-info.cute-btn-manual {
+    background-color: #87ceeb; /* Sky blue */
+    border-color: #87ceeb;
+    color: #004d66; /* Darker text */
+}
+
+.btn-info.cute-btn-manual:hover {
+    background-color: #6cb6d2;
+    border-color: #6cb6d2;
+}
+
+.cute-btn-add-alert {
+    background-color: #ff6347; /* Tomato red */
+    border-color: #ff6347;
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.cute-btn-add-alert:hover {
+    background-color: #e0523a;
+    transform: scale(1.02);
+}
+
+/* Custom animation classes */
+.animate-pulse-on-hover:hover {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.cute-alert.alert-success {
+    background-color: #d4edda; /* Light green */
+    border-color: #c3e6cb;
+    color: #155724;
+    animation: fadeInSlideDown 0.5s ease-out;
+}
+
+.cute-alert.alert-danger {
+    background-color: #f8d7da; /* Light red */
+    border-color: #f5c6cb;
+    color: #721c24;
+    animation: fadeInSlideDown 0.5s ease-out;
+}
+
+@keyframes fadeInSlideDown {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.cute-loading {
+    font-size: 1.8rem;
+    color: #ff99cc !important; /* Pink loading text */
+    animation: fadeInOut 2s infinite alternate;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.cute-no-pets,
+.cute-no-pet-selected {
+    font-size: 1.5rem;
+    color: #888 !important;
+    animation: bounceIn 0.8s ease-out;
+}
+
+.cute-pet-name {
+    display: inline-block; /* Required for heartBeat animation */
+}
+
+/* Adjustments for the switch for a cuter look */
+.cute-switch .form-check-input {
+    width: 3.5em; /* Make switch wider */
+    height: 2em; /* Make switch taller */
+    background-color: #f0c2d3; /* Light pink background when off */
+    border-color: #ffb3e0;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.cute-switch .form-check-input:checked {
+    background-color: #a0d8b4; /* Lovely green when on */
+    border-color: #7ab78d;
+}
+
+.cute-switch .form-check-label {
+    font-weight: 600;
+    color: #555 !important;
+}
+
+.cute-alert-item {
+    font-size: 1.1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #ffd1e8 !important; /* Cute dashed border for alerts */
+}
+
+.cute-alert-item:last-child {
+    border-bottom: none !important;
+}

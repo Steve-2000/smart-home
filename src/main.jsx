@@ -76,6 +76,10 @@ const router = createBrowserRouter([
 {
         path:'/laser',
         element:<LaserBoundaryControl/>
+},
+{
+  path:"/laserbeam",
+  element:<LaserBoundaryControl/>
 }
  
   

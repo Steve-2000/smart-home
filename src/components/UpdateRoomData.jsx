@@ -40,7 +40,8 @@ const UpdateRoomData = () => {
   const [humidity, setHumidity] = useState("");
   const [gas, setGas] = useState("Normal"); // Default to Normal
   const [motion, setMotion] = useState("No Motion"); // Default to No Motion
-  const [doorStatus, setDoorStatus] = useState("Closed"); // NEW: State for door status
+  const [doorStatus, setDoorStatus] = useState("Closed"); // State for door status
+  const [flameSensorStatus, setFlameSensorStatus] = useState("Normal"); // NEW: State for flame sensor status
 
   // Room-specific reminder state (renamed for clarity as pet reminders are separate)
   const [roomSpecificReminder, setRoomSpecificReminder] = useState("");
@@ -90,9 +91,8 @@ const UpdateRoomData = () => {
       setHumidity(roomData.status?.humidity || "");
       setGas(roomData.status?.gas || "Normal");
       setMotion(roomData.status?.motion || "No Motion");
-      setDoorStatus(roomData.doorStatus || "Closed"); // NEW: Load door status
-
-      // REMOVED pet-related data loading (rfidDetected, lastFed)
+      setDoorStatus(roomData.doorStatus || "Closed"); // Load door status
+      setFlameSensorStatus(roomData.status?.flameSensor || "Normal"); // NEW: Load flame sensor status
 
       setRoomSpecificReminder(roomData.reminders?.medication || ""); // Assuming 'medication' is a general reminder field for rooms
       setCurrentDevices(roomData.devices || {}); // Load devices into state
@@ -103,7 +103,7 @@ const UpdateRoomData = () => {
       setGas("Normal");
       setMotion("No Motion");
       setDoorStatus("Closed"); // Reset door status
-      // REMOVED pet-related data clearing
+      setFlameSensorStatus("Normal"); // NEW: Reset flame sensor status
       setRoomSpecificReminder("");
       setCurrentDevices({});
     }
@@ -157,14 +157,13 @@ const UpdateRoomData = () => {
         humidity: parseFloat(humidity) || 0,
         gas: gas,
         motion: motion,
+        flameSensor: flameSensorStatus, // NEW: Include flameSensorStatus in updates
       },
-      // NEW: Include doorStatus in updates
       doorStatus: doorStatus,
       reminders: {
         medication: roomSpecificReminder, // Save room-specific reminder
       },
       devices: currentDevices, // Include the updated devices object here
-      // REMOVED petActivity as it's no longer part of room data
     };
 
     try {
@@ -310,6 +309,20 @@ const UpdateRoomData = () => {
                     <option value="Open">Open</option>
                   </select>
                   <small className="form-text text-muted">Manually set the door's magnetic switch status.</small>
+                </div>
+                {/* NEW: Flame Sensor Status Input */}
+                <div className="mb-3">
+                  <label htmlFor="flameSensorStatus" className="form-label text-muted">Flame Sensor Status</label>
+                  <select
+                    className="form-select rounded-lg shadow-sm"
+                    id="flameSensorStatus"
+                    value={flameSensorStatus}
+                    onChange={(e) => setFlameSensorStatus(e.target.value)}
+                  >
+                    <option value="Normal">Normal</option>
+                    <option value="Detected">Detected</option>
+                  </select>
+                  <small className="form-text text-muted">Manually set the flame sensor status.</small>
                 </div>
               </div>
             </div>

@@ -1,102 +1,88 @@
 // src/pages/AddPet.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 // >>> IMPORTANT: PLEASE CAREFULLY VERIFY THIS FIREBASE.JS FILE PATH <<<
 //
 // The error "Could not resolve '../firebase.js'" means that the build system
 // cannot find your 'firebase.js' file at the specified location,
 // RELATIVE TO THIS 'AddPet.jsx' FILE.
 //
-// Let's assume 'AddPet.jsx' is located in 'src/pages/'.
+// Common Scenarios for 'AddPet.jsx' (assuming it's in 'src/pages/'):
 //
-// Scenario 1: 'firebase.js' is directly in the 'src/' directory.
-//   Your current import path: `../firebase.js`
-//   This means: Go UP one directory (from 'pages/' to 'src/'), then look for 'firebase.js'.
-//   -> THIS IS THE MOST COMMON AND USUALLY CORRECT SETUP for 'src/pages/' -> 'src/' imports.
-//   If your 'firebase.js' is at 'src/firebase.js', this line is correct.
+// 1. If 'firebase.js' is directly in the 'src/' directory (i.e., 'src/firebase.js'):
+//    The path should be: `../firebase.js`
+//    This means: Go UP one directory (from 'pages/' to 'src/'), then look for 'firebase.js'.
+//    -> THIS IS THE MOST COMMON AND LIKELY CORRECT SETUP for files in 'src/pages/'
 //
-// Scenario 2: 'firebase.js' is in a 'config' folder inside 'src/'.
-//   Example: 'src/config/firebase.js'
-//   You would need to change the import path to: `../config/firebase.js`
-//   (Go up one to 'src/', then into 'config/', then find 'firebase.js').
+// 2. If 'firebase.js' is in 'src/config/' (e.g., 'src/config/firebase.js'):
+//    The path should be: `../config/firebase.js`
+//    This means: Go UP one directory (from 'pages/' to 'src/'), then into 'config/', then find 'firebase.js'.
 //
-// Scenario 3: 'firebase.js' is in the SAME directory as 'AddPet.jsx'.
-//   Example: 'src/pages/firebase.js' (Less common, but possible)
-//   You would need to change the import path to: `./firebase.js`
-//   (Look in the current directory for 'firebase.js').
+// 3. If 'firebase.js' is in the SAME directory as 'AddPet.jsx' (less common, e.g., 'src/pages/firebase.js'):
+//    The path should be: `./firebase.js`
+//    This means: Look in the current directory ('src/pages/') for 'firebase.js'.
 //
-// PLEASE DOUBLE-CHECK YOUR PROJECT'S ACTUAL FOLDER STRUCTURE FOR 'firebase.js'
-// AND ADJUST THE IMPORT STATEMENT BELOW IF NECESSARY.
-//
+// Please adjust the import below if your 'firebase.js' is in a different location.
 import { db } from "../firebase.jsx";
-import { ref, push, onValue } from "firebase/database";
+import { ref, push } from "firebase/database";
 
 const AddPet = () => {
   const [petName, setPetName] = useState("");
-  const [petType, setPetType] = useState(""); // e.g., Dog, Cat, Bird
-  const [petRFID, setPetRFID] = useState(""); // Optional RFID tag for pet
-  const [associatedRoomId, setAssociatedRoomId] = useState(""); // To link pet to a room
-  const [rooms, setRooms] = useState({}); // To populate room dropdown
+  const [petType, setPetType] = useState("Dog"); // Default pet type
+  const [foodContainerLength, setFoodContainerLength] = useState(""); // NEW: Food container total length
+  const [waterContainerLength, setWaterContainerLength] = useState(""); // NEW: Water container total length
+  const [petRFID, setPetRFID] = useState(""); // State for RFID tag number
+  const [rfidDetectedStatus, setRfidDetectedStatus] = useState(false); // NEW: State for RFID Detected Status
 
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'danger'
 
-  // Fetch rooms to allow associating a pet with a room
-  useEffect(() => {
-    const roomsRef = ref(db, "rooms");
-    const unsubscribe = onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setRooms(data);
-    });
-    return () => unsubscribe();
-  }, []);
-
   const handleAddPet = async (e) => {
     e.preventDefault();
 
-    if (petName.trim() === "" || petType.trim() === "") {
-      setMessage("Pet Name and Type cannot be empty!");
+    if (petName.trim() === "") {
+      setMessage("Pet name cannot be empty!");
       setMessageType("danger");
       return;
     }
 
-    const petsRef = ref(db, "pets"); // Reference to the 'pets' collection/node
+    if (foodContainerLength !== "" && (isNaN(foodContainerLength) || parseFloat(foodContainerLength) <= 0)) {
+        setMessage("Food container length must be a positive number.");
+        setMessageType("danger");
+        return;
+    }
+
+    if (waterContainerLength !== "" && (isNaN(waterContainerLength) || parseFloat(waterContainerLength) <= 0)) {
+        setMessage("Water container length must be a positive number.");
+        setMessageType("danger");
+        return;
+    }
+
+    const petsRef = ref(db, "pets"); // Path to your 'pets' collection/node in DB
     try {
       await push(petsRef, {
         name: petName.trim(),
-        type: petType.trim(),
+        type: petType,
         rfidTag: petRFID.trim(), // Save RFID tag
-        associatedRoomId: associatedRoomId || "N/A", // Save associated room ID
-        createdAt: new Date().toISOString(),
+        foodContainerLength: foodContainerLength ? parseFloat(foodContainerLength) : 0, // Save as number
+        waterContainerLength: waterContainerLength ? parseFloat(waterContainerLength) : 0, // Save as number
+        currentFoodDistance: foodContainerLength ? parseFloat(foodContainerLength) : 0, // Initially full (distance 0 from sensor means full)
+        currentWaterDistance: waterContainerLength ? parseFloat(waterContainerLength) : 0, // Initially full
+        // NEW: Initialize petActivity with rfidDetected status
         petActivity: {
-          rfidDetected: false, // Default status
-          lastFed: "", // No feeding yet
-          lastSeenLocation: associatedRoomId ? rooms[associatedRoomId]?.name : "Unknown", // Initialize with associated room name
+          rfidDetected: rfidDetectedStatus,
+          lastFed: null, // Still null initially
+          lastWatered: null, // Still null initially
         },
-        feederSettings: {
-          enabled: false,
-          lastManualTrigger: "",
-          foodLevel: 100,
-          portionSize: 50,
-          dailyFrequency: 1 // NEW: Default to 1 time per day
-        },
-        waterDispenserSettings: {
-          enabled: false,
-          lastManualTrigger: "",
-          waterLevel: 100,
-          refillThreshold: 20,
-          dailyFrequency: 1 // NEW: Default to 1 time per day
-        },
-        reminders: {
-          medication: ""
-        },
-        alerts: []
+        createdAt: new Date().toISOString(),
       });
       setMessage(`Pet "${petName.trim()}" added successfully!`);
       setMessageType("success");
-      setPetName("");
-      setPetType("");
-      setPetRFID("");
-      setAssociatedRoomId("");
+      setPetName(""); // Clear input fields
+      setPetType("Dog");
+      setFoodContainerLength("");
+      setWaterContainerLength("");
+      setPetRFID(""); // Clear RFID input
+      setRfidDetectedStatus(false); // Reset RFID detected status
     } catch (error) {
       console.error("Error adding pet:", error);
       setMessage(`Failed to add pet: ${error.message}`);
@@ -106,7 +92,7 @@ const AddPet = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4 text-primary fw-bold">🐶 Add New Pet Profile</h2>
+      <h2 className="mb-4 text-primary fw-bold">➕ Add New Pet</h2>
       <div className="card shadow-lg rounded-xl p-4">
         <form onSubmit={handleAddPet}>
           {message && (
@@ -115,8 +101,6 @@ const AddPet = () => {
               <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           )}
-
-          {/* Pet Name Input */}
           <div className="mb-3">
             <label htmlFor="petNameInput" className="form-label text-muted">Pet Name</label>
             <input
@@ -129,54 +113,81 @@ const AddPet = () => {
               required
             />
           </div>
-
-          {/* Pet Type Input */}
           <div className="mb-3">
-            <label htmlFor="petTypeInput" className="form-label text-muted">Pet Type</label>
-            <input
-              type="text"
-              className="form-control form-control-lg rounded-lg shadow-sm"
-              id="petTypeInput"
-              placeholder="e.g., Dog, Cat, Parrot"
+            <label htmlFor="petTypeSelect" className="form-label text-muted">Pet Type</label>
+            <select
+              className="form-select form-select-lg rounded-lg shadow-sm"
+              id="petTypeSelect"
               value={petType}
               onChange={(e) => setPetType(e.target.value)}
-              required
-            />
+            >
+              <option value="Dog">Dog</option>
+              <option value="Cat">Cat</option>
+              <option value="Bird">Bird</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
-
-          {/* Pet RFID Tag (Optional) */}
+          {/* NEW: Pet RFID Tag Input */}
           <div className="mb-3">
-            <label htmlFor="petRFIDInput" className="form-label text-muted">RFID Tag (Optional)</label>
+            <label htmlFor="petRFIDInput" className="form-label text-muted">RFID Tag Number (Optional)</label>
             <input
               type="text"
               className="form-control rounded-lg shadow-sm"
               id="petRFIDInput"
-              placeholder="e.g., ABCD123"
+              placeholder="e.g., 1234567890ABCD"
               value={petRFID}
               onChange={(e) => setPetRFID(e.target.value)}
             />
+            <small className="form-text text-muted">
+              Enter the unique RFID tag number for your pet, if applicable.
+            </small>
+          </div>
+          {/* NEW: RFID Detected Status */}
+          <div className="mb-3 form-check form-switch form-check-lg">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="rfidDetectedSwitch"
+              checked={rfidDetectedStatus}
+              onChange={(e) => setRfidDetectedStatus(e.target.checked)}
+            />
+            <label className="form-check-label ms-2 fs-5 text-muted" htmlFor="rfidDetectedSwitch">
+              RFID Currently Detected
+            </label>
+            <small className="form-text text-muted d-block">
+              Set this if the pet's RFID is currently being detected by a sensor.
+            </small>
+          </div>
+          {/* NEW: Food Container Length */}
+          <div className="mb-3">
+            <label htmlFor="foodContainerLengthInput" className="form-label text-muted">Food Container Total Length (cm)</label>
+            <input
+              type="number"
+              step="0.1"
+              className="form-control rounded-lg shadow-sm"
+              id="foodContainerLengthInput"
+              placeholder="e.g., 30 (total length from sensor to bottom)"
+              value={foodContainerLength}
+              onChange={(e) => setFoodContainerLength(e.target.value)}
+            />
+            <small className="form-text text-muted">Enter the total length of the food container for accurate level calculation. (e.g., 30 for a 30cm deep container)</small>
+          </div>
+          {/* NEW: Water Container Length */}
+          <div className="mb-3">
+            <label htmlFor="waterContainerLengthInput" className="form-label text-muted">Water Container Total Length (cm)</label>
+            <input
+              type="number"
+              step="0.1"
+              className="form-control rounded-lg shadow-sm"
+              id="waterContainerLengthInput"
+              placeholder="e.g., 20 (total length from sensor to bottom)"
+              value={waterContainerLength}
+              onChange={(e) => setWaterContainerLength(e.target.value)}
+            />
+            <small className="form-text text-muted">Enter the total length of the water container for accurate level calculation. (e.g., 20 for a 20cm deep container)</small>
           </div>
 
-          {/* Associated Room (Optional) */}
-          <div className="mb-4">
-            <label htmlFor="associatedRoomSelect" className="form-label text-muted">Associated Room (Optional)</label>
-            <select
-              id="associatedRoomSelect"
-              className="form-select rounded-lg shadow-sm"
-              value={associatedRoomId}
-              onChange={(e) => setAssociatedRoomId(e.target.value)}
-            >
-              <option value="">-- Select a Room --</option>
-              {Object.entries(rooms).map(([roomId, room]) => (
-                <option key={roomId} value={roomId}>
-                  {room.name}
-                </option>
-              ))}
-            </select>
-            <small className="form-text text-muted">For tracking pet's primary location.</small>
-          </div>
-
-          {/* Submit Button */}
           <button className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm animate-pulse-on-hover" type="submit">
             Add Pet
           </button>

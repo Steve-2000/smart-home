@@ -1,9 +1,49 @@
-.nav-link:hover {
-  background-color: #e0e0e0;
-  border-radius: 8px;
+/* src/components/sidebar.css */
+
+/* Custom background for the sidebar to give it a distinct look */
+.bg-sidebar {
+  background-color: #e3f2fd; /* A very light, engaging blue (Bootstrap's primary-100 equivalent) */
+  /* Ensure the height is applied correctly from MainLayout */
+  height: 100%; 
+  display: flex;
+  flex-direction: column;
 }
 
-.btn-outline-danger:hover {
-  background-color: #dc3545;
-  color: white;
+/* Style for the active navigation link */
+.active-sidebar-link {
+  background-color: #007bff; /* Primary blue for active */
+  color: #ffffff !important; /* White text for active link */
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2); /* Subtle shadow for depth */
+}
+
+/* Hover effect for all navigation links */
+.nav-link:not(.active-sidebar-link):hover {
+  background-color: #d0e7fa; /* Slightly darker light blue on hover */
+  color: #0056b3 !important; /* Darker blue on hover */
+  transform: translateX(3px); /* Slight movement to indicate interactivity */
+  transition: all 0.2s ease-in-out; /* Smooth transition */
+}
+
+/* Reset transform for non-hovered links */
+.nav-link:not(:hover) {
+  transition: all 0.2s ease-in-out;
+  transform: translateX(0);
+}
+
+/* Divider style */
+.sidebar-divider {
+  border-top: 1px solid #cce5ff; /* A slightly darker blue border for the divider */
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+/* Optional: Adjust font size for the entire sidebar for better readability */
+.nav-link {
+  font-size: 0.95rem; /* Slightly smaller for compactness */
+}
+
+/* Ensure the SideBar component inside the column takes full height */
+.col-auto.bg-sidebar > div {
+  height: 100%; /* Make sure the inner div in SideBar also takes full height */
 }
