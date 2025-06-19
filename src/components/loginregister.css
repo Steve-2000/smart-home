@@ -2,3 +2,10 @@
 form input:focus {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
+
+.login-bg {
+  min-height: 100vh;
+  background: url('image24.png') no-repeat center center fixed;
+  background-size: cover;
+  opacity: 0.9;
+}

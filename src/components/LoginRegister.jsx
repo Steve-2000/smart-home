@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './loginregister.css'; // Optional: Your custom styles
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
@@ -18,6 +18,15 @@ const LoginRegister = () => {
     password: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    // Add background class to body when LoginRegister is mounted
+    document.body.classList.add('login-bg');
+    return () => {
+      // Remove background class when LoginRegister is unmounted
+      document.body.classList.remove('login-bg');
+    };
+  }, []);
 
   const toggleForm = () => setIsRegister(!isRegister);
 

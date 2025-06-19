@@ -20,7 +20,7 @@ const SideBar = () => {
 
   return (
     <div className="d-flex flex-column h-100"> {/* Flex column to push logout to bottom */}
-      <h4 className="text-center mb-4 mt-3 text-primary fw-bold">Smart Home Hub</h4>
+      <h4 className="text-center mb-4 mt-3 text-primary fw-bold">Smart Home Application</h4>
       <hr className="sidebar-divider mb-4" /> {/* A subtle divider */}
       
       <ul className="nav flex-column flex-grow-1"> {/* flex-grow-1 makes this list take available space */}

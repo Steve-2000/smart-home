@@ -1,0 +1,214 @@
+/* src/pages/NotificationSettings.css */
+
+/* General page container styling */
+.notification-page-container {
+  padding-top: 2rem; /* Consistent padding at the top */
+  padding-bottom: 3rem; /* Padding at the bottom */
+  max-width: 800px; /* Limit max width for better readability on large screens */
+}
+
+/* Main Heading */
+.notification-main-heading {
+  font-size: 2.5rem; /* Larger font for main heading */
+  margin-bottom: 2.5rem;
+  color: #2563eb; /* A strong blue from Tailwind's blue-600 */
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.025em; /* Tailwind's tracking-wide */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05); /* Soft drop shadow */
+}
+
+/* Main Card Styling */
+.notification-card {
+  background-color: #ffffff;
+  border-radius: 1.5rem; /* Rounded-3xl in Tailwind */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind's shadow-xl */
+  padding: 2.5rem; /* p-6 md:p-10 */
+  border: 1px solid #f3f4f6; /* border border-gray-100 */
+}
+
+/* Sub-headings within the card */
+.notification-sub-heading {
+  font-size: 1.25rem; /* text-xl md:text-2xl */
+  font-weight: 600; /* font-semibold */
+  color: #374151; /* text-gray-700 */
+  margin-bottom: 1rem; /* mb-4 */
+  padding-bottom: 0.75rem; /* pb-3 */
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+  text-align: center;
+}
+
+/* Custom Toggle Switch Styling */
+/* This is crucial for fixing the visual appearance */
+.notification-switch-label {
+  position: relative;
+  display: inline-flex; /* Use inline-flex for better alignment with text */
+  align-items: center;
+  cursor: pointer;
+}
+
+.notification-switch-input {
+  /* Hide default browser checkbox */
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.notification-switch-slider {
+  position: relative;
+  width: 3.5rem; /* w-14 (14 * 0.25rem = 3.5rem) */
+  height: 2rem; /* h-8 (8 * 0.25rem = 2rem) */
+  background-color: #d1d5db; /* bg-gray-300 */
+  border-radius: 9999px; /* rounded-full */
+  transition: background-color 0.3s;
+  display: inline-block; /* Ensure it's treated as a block for width/height */
+}
+
+/* Circle inside the slider */
+.notification-switch-slider:before {
+  content: "";
+  position: absolute;
+  width: 1.5rem; /* w-6 */
+  height: 1.5rem; /* h-6 */
+  border-radius: 50%;
+  background-color: white;
+  top: 0.25rem; /* top-1 (4px) */
+  left: 0.25rem; /* left-[4px] */
+  transition: transform 0.3s;
+}
+
+/* When checkbox is checked */
+.notification-switch-input:checked + .notification-switch-slider {
+  background-color: #3b82f6; /* bg-blue-500 */
+}
+
+.notification-switch-input:checked + .notification-switch-slider:before {
+  transform: translateX(1.5rem); /* Move 6 units to the right (w-6) */
+}
+
+.notification-switch-input:focus + .notification-switch-slider {
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.5); /* peer-focus:ring-blue-300 */
+}
+
+.notification-switch-text {
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 500; /* font-medium */
+    color: #1f2937; /* text-gray-800 */
+    margin-left: 0.75rem; /* ml-3 */
+}
+
+
+/* Input Field Styling */
+.notification-input {
+  width: 100%;
+  padding: 0.75rem; /* p-3 */
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, ring 0.2s ease; /* transition duration-200 */
+  outline: none; /* Remove default outline */
+  -webkit-appearance: none; /* For time inputs on some browsers */
+  -moz-appearance: none; /* For time inputs on some browsers */
+  appearance: none; /* For time inputs on some browsers */
+}
+
+.notification-input:focus {
+  border-color: #3b82f6; /* focus:border-blue-500 */
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5); /* focus:ring-2 focus:ring-blue-300 */
+}
+
+/* Small helper text */
+.notification-small-text {
+  font-size: 0.875rem; /* text-sm */
+  color: #6b7280; /* text-gray-500 */
+  margin-top: 0.25rem; /* mt-1 */
+  display: block;
+}
+
+/* Labels for inputs */
+.notification-label {
+  display: block; /* block */
+  color: #374151; /* text-gray-700 */
+  font-size: 1rem; /* text-base */
+  font-weight: 600; /* font-semibold */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+/* Save Button */
+.notification-save-btn {
+  width: 100%;
+  padding-top: 0.75rem; /* py-3 */
+  padding-bottom: 0.75rem; /* py-3 */
+  padding-left: 1.5rem; /* px-6 */
+  padding-right: 1.5rem; /* px-6 */
+  background-color: #2563eb; /* bg-blue-600 */
+  color: white;
+  font-weight: 700; /* font-bold */
+  border-radius: 9999px; /* rounded-full */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+  transition: background-color 0.3s ease, transform 0.3s ease; /* transition duration-300 transform */
+  margin-top: 2rem; /* mt-8 */
+}
+
+.notification-save-btn:hover {
+  background-color: #1d4ed8; /* hover:bg-blue-700 */
+  transform: scale(1.02); /* hover:scale-105 (slight scale up) */
+}
+
+/* Info Box at the bottom */
+.notification-info-box {
+  background-color: #dbeafe; /* bg-blue-100 */
+  border: 1px solid #bfdbfe; /* border border-blue-200 */
+  color: #1e40af; /* text-blue-800 */
+  padding: 1rem; /* p-4 */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+  margin-top: 2.5rem; /* mt-10 */
+  font-size: 0.875rem; /* text-sm */
+  font-style: italic; /* italic */
+  font-weight: 300; /* font-light */
+}
+
+/* Alert messages (general) */
+.notification-alert {
+  border-radius: 0.75rem;
+  font-weight: 500;
+}
+.notification-alert.bg-green-100 {
+  background-color: #d1fae5; /* bg-green-100 */
+  color: #065f46; /* text-green-800 */
+  border-color: #a7f3d0; /* border-green-200 */
+}
+.notification-alert.bg-red-100 {
+  background-color: #fee2e2; /* bg-red-100 */
+  color: #991b1b; /* text-red-800 */
+  border-color: #fca5a5; /* border-red-200 */
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) { /* On small devices */
+  .notification-main-heading {
+    font-size: 2rem; /* Smaller heading on mobile */
+  }
+  .notification-card {
+    padding: 1.5rem; /* Less padding on mobile */
+  }
+  .notification-sub-heading {
+    font-size: 1.125rem; /* Smaller sub-heading on mobile */
+  }
+  .notification-switch-text {
+    font-size: 1rem; /* Smaller switch text on mobile */
+  }
+  .notification-input {
+    padding: 0.6rem 1rem; /* Smaller input padding on mobile */
+    font-size: 0.95rem;
+  }
+  .notification-save-btn {
+    font-size: 1.05rem;
+    padding: 0.65rem 1rem;
+  }
+  .notification-info-box {
+    font-size: 0.8rem;
+  }
+}

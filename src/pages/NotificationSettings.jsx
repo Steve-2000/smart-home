@@ -1,35 +1,10 @@
-// src/pages/NotificationSettings.jsx
 import React, { useState, useEffect } from "react";
 // >>> IMPORTANT: PLEASE CAREFULLY VERIFY THIS FIREBASE.JS FILE PATH <<<
-//
-// The error "Could not resolve '../firebase.js'" means that the build system
-// cannot find your 'firebase.js' file at the specified location,
-// RELATIVE TO THIS 'NotificationSettings.jsx' FILE.
-//
-// Let's assume 'NotificationSettings.jsx' is located in 'src/pages/'.
-//
-// Scenario 1: 'firebase.js' is directly in the 'src/' directory.
-//   Your current import path: `../firebase.js`
-//   This means: Go UP one directory (from 'pages/' to 'src/'), then look for 'firebase.js'.
-//   -> THIS IS THE MOST COMMON AND USUALLY CORRECT SETUP for 'src/pages/' -> 'src/' imports.
-//   If your 'firebase.js' is at 'src/firebase.js', this line is correct.
-//
-// Scenario 2: 'firebase.js' is in a 'config' folder inside 'src/'.
-//   Example: 'src/config/firebase.js'
-//   You would need to change the import path to: `../config/firebase.js`
-//   (Go up one to 'src/', then into 'config/', then find 'firebase.js').
-//
-// Scenario 3: 'firebase.js' is in the SAME directory as 'NotificationSettings.jsx'.
-//   Example: 'src/pages/firebase.js' (Less common, but possible)
-//   You would need to change the import path to: `./firebase.js`
-//   (Look in the current directory for 'firebase.js').
-//
-// PLEASE DOUBLE-CHECK YOUR PROJECT'S ACTUAL FOLDER STRUCTURE FOR 'firebase.js'
-// AND ADJUST THE IMPORT STATEMENT BELOW IF NECESSARY.
-//
 import { db } from "../firebase.jsx";
 import { ref, onValue, update } from "firebase/database";
 import { getAuth } from "firebase/auth"; // To get current user UID
+
+import './notification.css'; // Link to our dedicated CSS file
 
 const NotificationSettings = () => {
   const [userId, setUserId] = useState(null);
@@ -39,7 +14,7 @@ const NotificationSettings = () => {
   const [scheduleEndTime, setScheduleEndTime] = useState("05:00");   // Default 5 AM
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' or 'danger'
 
   useEffect(() => {
     const auth = getAuth();
@@ -70,13 +45,21 @@ const NotificationSettings = () => {
     e.preventDefault();
 
     if (!userId) {
-      setMessage("You must be logged in to save settings.");
+      setMessage("Oops! You need to be logged in to save your notification preferences. 🙁");
       setMessageType("danger");
       return;
     }
 
     if (emailAlertsEnabled && alertEmail.trim() === "") {
-      setMessage("Email is required if email alerts are enabled.");
+      setMessage("Aha! If email alerts are enabled, a valid email address is needed. 📧");
+      setMessageType("danger");
+      return;
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailAlertsEnabled && !emailRegex.test(alertEmail.trim())) {
+      setMessage("Please enter a valid email address. 📩");
       setMessageType("danger");
       return;
     }
@@ -84,95 +67,133 @@ const NotificationSettings = () => {
     try {
       await update(ref(db, `users/${userId}/notificationSettings`), {
         emailAlertsEnabled,
-        alertEmail: alertEmail.trim(),
+        alertEmail: emailAlertsEnabled ? alertEmail.trim() : "", // Clear email if alerts disabled
         scheduleStartTime,
         scheduleEndTime,
       });
-      setMessage("Notification settings saved successfully!");
+      setMessage("Great! Your notification settings have been saved successfully! ✅");
       setMessageType("success");
     } catch (error) {
       console.error("Error saving notification settings:", error);
-      setMessage(`Failed to save settings: ${error.message}`);
+      setMessage(`Oh dear! Failed to save settings: ${error.message} 🚫`);
       setMessageType("danger");
     }
   };
 
   if (loading) {
-    return <div className="text-center p-5 text-muted">Loading notification settings...</div>;
+    return (
+      <div className="text-center p-5 text-gray-500 text-xl font-medium">
+        Loading your notification settings... ✨
+      </div>
+    );
   }
 
   if (!userId) {
-    return <div className="text-center p-5 text-danger">Please log in to manage notification settings.</div>;
+    return (
+      <div className="text-center p-5 text-red-600 text-xl font-bold">
+        Please log in to manage your notification settings. 🔒
+      </div>
+    );
   }
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-5 text-primary fw-bold">🔔 Notification Settings</h2>
-      <div className="card shadow-lg rounded-xl p-4">
+    <div className="container mx-auto px-4 mt-8 lg:mt-12 mb-10 notification-page-container animate__animated animate__fadeIn">
+      <h2 className="text-4xl lg:text-5xl font-bold text-blue-600 mb-8 text-center tracking-wide notification-main-heading">
+        🔔 Your Alert Preferences 🔔
+      </h2>
+
+      <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-100 notification-card">
         <form onSubmit={handleSaveSettings}>
           {message && (
-            <div className={`alert alert-${messageType} alert-dismissible fade show mb-4`} role="alert">
+            <div
+              className={`p-4 mb-6 rounded-xl text-center font-medium shadow-md transition-opacity duration-300
+                ${messageType === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}
+                notification-alert
+              `}
+              role="alert"
+            >
               {message}
-              <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <button
+                type="button"
+                className="ml-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+                onClick={() => setMessage('')} // Manually clear message
+                aria-label="Close"
+              >
+                &times;
+              </button>
             </div>
           )}
 
-          <div className="mb-4">
-            <h5 className="text-secondary mb-3">Email Alerts for Door Activity (Midnight Only)</h5>
-            <div className="form-check form-switch form-check-lg mb-3">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                role="switch"
-                id="emailAlertsEnabledSwitch"
-                checked={emailAlertsEnabled}
-                onChange={(e) => setEmailAlertsEnabled(e.target.checked)}
-              />
-              <label className="form-check-label ms-2 fs-5 fw-medium text-dark" htmlFor="emailAlertsEnabledSwitch">
-                Enable Email Alerts
+          <div className="mb-8">
+            <h5 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-200 text-center notification-sub-heading">
+              Email Alerts for Door Activity 🚪
+            </h5>
+            <div className="flex items-center mb-3 justify-center md:justify-start"> {/* Centered switch */}
+              <label htmlFor="emailAlertsEnabledSwitch" className="notification-switch-label">
+                <input
+                  type="checkbox"
+                  id="emailAlertsEnabledSwitch"
+                  className="notification-switch-input"
+                  checked={emailAlertsEnabled}
+                  onChange={(e) => setEmailAlertsEnabled(e.target.checked)}
+                />
+                <span className="notification-switch-slider"></span>
+                <span className="ml-3 text-lg font-medium text-gray-800 notification-switch-text">
+                  Enable Email Alerts {emailAlertsEnabled ? '✅' : '❌'}
+                </span>
               </label>
             </div>
-            <p className="text-muted small">
-              When enabled, you will receive email alerts about door open events *only* during the scheduled time window below.
-              Door open events will always appear on the website regardless of this setting.
+            <p className="text-sm text-gray-500 mt-2 text-center md:text-left">
+              Get email alerts for door open events! You'll only receive these during the specified schedule below.
+              All door events are always visible on your dashboard. 🔔
             </p>
           </div>
 
           {emailAlertsEnabled && (
             <>
-              <div className="mb-3">
-                <label htmlFor="alertEmailInput" className="form-label text-muted">Alert Email Address</label>
+              <div className="mb-6">
+                <label htmlFor="alertEmailInput" className="block text-gray-700 text-base font-semibold mb-2 notification-label">
+                  Recipient Email Address 📧
+                </label>
                 <input
                   type="email"
-                  className="form-control rounded-lg shadow-sm"
+                  className="w-full p-3 border border-gray-300 rounded-xl shadow-sm notification-input"
                   id="alertEmailInput"
                   placeholder="your-email@example.com"
                   value={alertEmail}
                   onChange={(e) => setAlertEmail(e.target.value)}
                   required={emailAlertsEnabled}
                 />
-                <small className="form-text text-muted">Emails will be sent to this address.</small>
+                <small className="text-sm text-gray-500 mt-1 block notification-small-text">
+                  Alerts will be sent to this email. Make sure it's correct! ✔️
+                </small>
               </div>
 
-              <div className="mb-4">
-                <h5 className="text-secondary mb-3">Email Alert Schedule (Midnight Window)</h5>
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label htmlFor="scheduleStartTime" className="form-label text-muted">Start Time</label>
+              <div className="mb-8">
+                <h5 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-200 text-center notification-sub-heading">
+                  Alert Schedule (Your Quiet Hours) 🌙
+                </h5>
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                  <div className="flex-1">
+                    <label htmlFor="scheduleStartTime" className="block text-gray-700 text-base font-semibold mb-2 notification-label">
+                      Start Time ⏰
+                    </label>
                     <input
                       type="time"
-                      className="form-control rounded-lg shadow-sm"
+                      className="w-full p-3 border border-gray-300 rounded-xl shadow-sm notification-input"
                       id="scheduleStartTime"
                       value={scheduleStartTime}
                       onChange={(e) => setScheduleStartTime(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="scheduleEndTime" className="form-label text-muted">End Time</label>
+                  <div className="flex-1">
+                    <label htmlFor="scheduleEndTime" className="block text-gray-700 text-base font-semibold mb-2 notification-label">
+                      End Time 🕰️
+                    </label>
                     <input
                       type="time"
-                      className="form-control rounded-lg shadow-sm"
+                      className="w-full p-3 border border-gray-300 rounded-xl shadow-sm notification-input"
                       id="scheduleEndTime"
                       value={scheduleEndTime}
                       onChange={(e) => setScheduleEndTime(e.target.value)}
@@ -180,23 +201,28 @@ const NotificationSettings = () => {
                     />
                   </div>
                 </div>
-                <small className="form-text text-muted">
-                  Email alerts will only be sent if a door event occurs within this daily time range.
+                <small className="text-sm text-gray-500 mt-2 block notification-small-text">
+                  Email alerts are only sent if a door event happens within this time window. Perfect for security at night! 🤫
                 </small>
               </div>
             </>
           )}
 
-          <button type="submit" className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm animate-pulse-on-hover">
-            Save Notification Settings
+          <button
+            type="submit"
+            className="w-full py-3 px-6 bg-blue-600 text-white font-bold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 mt-8 notification-save-btn animate-pulse-on-hover"
+          >
+            Save My Notification Preferences! 🎉
           </button>
         </form>
       </div>
 
-      <div className="alert alert-info mt-5" role="alert">
-        <strong>Important:</strong> Actual email sending requires a backend service (e.g., Firebase Cloud Functions, Node.js server)
-        that can monitor door status changes and send emails based on the schedule configured here. This web application
-        only stores your preferences.
+      <div className="bg-blue-100 border border-blue-200 text-blue-800 p-4 rounded-xl shadow-md mt-10 text-sm italic font-light notification-info-box">
+        <strong>Heads Up! 💡</strong> While this app helps you configure your notification preferences,
+        the actual magic of sending emails (like "Door Opened!" alerts) happens via a separate backend service.
+        This usually involves a server (e.g., using Firebase Cloud Functions or a Node.js server) that
+        monitors your smart home's data and dispatches emails based on these settings. This web app
+        is your friendly control panel for those backend rules!
       </div>
     </div>
   );

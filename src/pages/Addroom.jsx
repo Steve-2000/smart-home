@@ -43,13 +43,13 @@ const Addroom = () => {
   // Function to add a device to the temporary list (not Firebase yet)
   const handleAddDevice = () => {
     if (newDeviceName.trim() === "") {
-      setMessage("Device name cannot be empty.");
+      setMessage("Oops! Device name can't be empty. Give it a cute name! 💡");
       setMessageType("danger");
       return;
     }
     // Check for duplicate device names (case-insensitive) within the current list
     if (devicesToAdd.some(device => device.name.toLowerCase() === newDeviceName.trim().toLowerCase())) {
-      setMessage("Device with this name already added for this room. Please choose a unique name.");
+      setMessage("A device with this name is already in your list for this room! Try another fun name. ✨");
       setMessageType("danger");
       return;
     }
@@ -69,7 +69,7 @@ const Addroom = () => {
     e.preventDefault();
 
     if (roomName.trim() === "") {
-      setMessage("Room name cannot be empty!");
+      setMessage("Oh dear! A room needs a name! How about 'Cozy Corner'? 🏡");
       setMessageType("danger");
       return;
     }
@@ -88,13 +88,18 @@ const Addroom = () => {
         createdAt: new Date().toISOString(),
         devices: devicesObject, // Device data for this room
         // Initialize other ROOM-SPECIFIC properties with default values
-        status: { temperature: 0, humidity: 0, gas: "Normal", motion: "No Motion" },
-        // NEW: Initialize doorStatus for magnetic switch
+        status: {
+          temperature: 0,
+          humidity: 0,
+          gas: "Normal",
+          motion: "No Motion",
+          flameSensor: "Normal" // Ensure flame sensor is initialized
+        },
         doorStatus: "Closed", // Default to closed
         reminders: { medication: "" }, // Room-specific reminders if any
         alerts: [] // Room-specific alerts if any
       });
-      setMessage(`Room "${roomName.trim()}" and its devices added successfully!`);
+      setMessage(`Yay! Your new room "${roomName.trim()}" and its awesome gadgets are ready! ✨`);
       setMessageType("success");
       setRoomName(""); // Clear room name input
       setDevicesToAdd([]); // Clear devices list after successful submission
@@ -102,18 +107,18 @@ const Addroom = () => {
       setNewDeviceInitialState(false); // Reset new device checkbox
     } catch (error) {
       console.error("Error adding room:", error);
-      setMessage(`Failed to add room: ${error.message}`);
+      setMessage(`Oh no! Couldn't add your room: ${error.message} 😥`);
       setMessageType("danger");
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4 text-primary fw-bold">➕ Add New Room & Devices</h2>
-      <div className="card shadow-lg rounded-xl p-4">
+    <div className="container mt-4 animate__animated animate__fadeIn"> {/* Added fade-in animation */}
+      <h2 className="mb-4 text-primary fw-bold cute-heading text-center">💖 Welcome to Your New Room! 💖</h2>
+      <div className="card shadow-lg rounded-xl p-4 cute-card"> {/* Applied cute-card style */}
         <form onSubmit={handleAddRoom}>
           {message && (
-            <div className={`alert alert-${messageType} alert-dismissible fade show`} role="alert">
+            <div className={`alert alert-${messageType} alert-dismissible fade show mb-4 rounded-3 shadow-sm cute-alert`} role="alert">
               {message}
               <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -121,35 +126,35 @@ const Addroom = () => {
 
           {/* Room Name Input */}
           <div className="mb-4">
-            <label htmlFor="roomNameInput" className="form-label text-muted">Room Name</label>
+            <label htmlFor="roomNameInput" className="form-label text-muted cute-label">Room's Happy Name:</label>
             <input
               type="text"
-              className="form-control form-control-lg rounded-lg shadow-sm"
+              className="form-control form-control-lg rounded-lg shadow-sm cute-input"
               id="roomNameInput"
-              placeholder="e.g., Living Room, Bedroom"
+              placeholder="e.g., Cozy Living Room, Dream Bedroom"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               required
             />
           </div>
 
-          <h5 className="text-secondary mb-3">Add Devices to this Room</h5>
-          <div className="card shadow-sm rounded-lg p-3 mb-4 bg-light">
+          <h5 className="text-secondary mb-3 cute-label text-center">Add Your Room's Smart Helpers! 🤖</h5>
+          <div className="card shadow-sm rounded-lg p-3 mb-4 bg-light cute-card-inner"> {/* Inner card for device list */}
             {/* Input fields for adding a new device */}
             <div className="row g-2 align-items-center mb-3">
               <div className="col-md-6">
                 <input
                   type="text"
-                  className="form-control rounded-lg"
-                  placeholder="Device Name (e.g., lights, fan, TV)"
+                  className="form-control rounded-lg cute-input"
+                  placeholder="Gadget Name (e.g., lights, fan, TV)"
                   value={newDeviceName}
                   onChange={(e) => setNewDeviceName(e.target.value)}
                 />
               </div>
               <div className="col-md-3">
-                <div className="form-check form-switch d-flex align-items-center h-100">
+                <div className="form-check form-switch d-flex align-items-center h-100 cute-switch"> {/* Applied cute-switch */}
                   <input
-                    className="form-check-input my-0" // my-0 to center vertically
+                    className="form-check-input my-0"
                     type="checkbox"
                     role="switch"
                     id="newDeviceInitialState"
@@ -157,57 +162,57 @@ const Addroom = () => {
                     onChange={(e) => setNewDeviceInitialState(e.target.checked)}
                   />
                   <label className="form-check-label ms-2 text-muted" htmlFor="newDeviceInitialState">
-                    Initial ON
+                    Start ON? ✨
                   </label>
                 </div>
               </div>
               <div className="col-md-3">
                 <button
                   type="button"
-                  className="btn btn-outline-primary w-100 rounded-pill btn-sm"
+                  className="btn btn-outline-primary w-100 rounded-pill btn-sm cute-btn-sm animate-bounce-on-hover"
                   onClick={handleAddDevice}
                 >
-                  Add Device
+                  Add Gadget! ➕
                 </button>
               </div>
             </div>
 
             {/* List of devices added to the current room (temporary) */}
             {devicesToAdd.length > 0 && (
-              <ul className="list-group list-group-flush border rounded-lg overflow-hidden">
-                <li className="list-group-item bg-light fw-bold text-dark d-flex justify-content-between align-items-center">
-                    <span>Device Name</span>
-                    <span>Initial State</span>
+              <ul className="list-group list-group-flush border rounded-lg overflow-hidden mt-3 cute-list">
+                <li className="list-group-item bg-info-subtle fw-bold text-dark d-flex justify-content-between align-items-center cute-list-header">
+                    <span>Gadget Name</span>
+                    <span>Starting State</span>
                     <span>Action</span>
                 </li>
                 {devicesToAdd.map((device, index) => (
                   <li
                     key={index}
-                    className="list-group-item d-flex justify-content-between align-items-center py-2"
+                    className="list-group-item d-flex justify-content-between align-items-center py-2 cute-list-item animate__animated animate__fadeIn"
                   >
-                    <span className="fw-medium">{device.name}</span>
-                    <span className={`badge ${device.initialState ? 'bg-success' : 'bg-secondary'}`}>
-                      {device.initialState ? "ON" : "OFF"}
+                    <span className="fw-medium text-dark">{device.name}</span>
+                    <span className={`badge cute-badge ${device.initialState ? 'bg-success' : 'bg-secondary'}`}>
+                      {device.initialState ? "ON 🟢" : "OFF 🔴"}
                     </span>
                     <button
                       type="button"
-                      className="btn btn-outline-danger btn-sm rounded-pill"
+                      className="btn btn-outline-danger btn-sm rounded-pill cute-btn-sm-danger animate-bounce-on-hover"
                       onClick={() => handleRemoveDevice(index)}
                     >
-                      Remove
+                      Bye Bye! ❌
                     </button>
                   </li>
                 ))}
               </ul>
             )}
             {devicesToAdd.length === 0 && (
-              <p className="text-muted text-center mt-3">No devices added for this room yet.</p>
+              <p className="text-muted text-center mt-3 py-3 fs-5">No little helpers added for this room yet! 🐾</p>
             )}
           </div>
 
           {/* Submit Button for the entire room */}
-          <button className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm animate-pulse-on-hover" type="submit">
-            Create Room & Devices
+          <button className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm animate-pulse-on-hover mt-4 cute-btn" type="submit">
+            🎉 Create Your Cozy New Room! 🎉
           </button>
         </form>
       </div>
