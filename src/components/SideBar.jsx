@@ -7,15 +7,18 @@ const SideBar = () => {
   const location = useLocation(); // Hook to get current URL path
 
   const navLinks = [
-    { to: "/dashboard", icon: "🏠", text: "Dashboard" },
-    { to: "/homeoverview", icon: "📊", text: "Overview" },
-    { to: "/devices", icon: "💡", text: "Devices" },
-    { to: "/addroom", icon: "➕", text: "Add Room" },
-    { to: "/updateroomdata", icon: "⚙️", text: "Manage Rooms" },
-    { to: "/pets", icon: "🐾", text: "Pet Care" },
-    { to: "/addpet", icon: "➕", text: "Add Pet" },
-    { to: "/laserbeam", icon: "🚨", text: "Laser Boundary" },
-    { to: "/notification-settings", icon: "🔔", text: "Notifications" },
+    // PREPEND '/home' to all internal application routes
+    { to: "/home/dashboard", icon: "🏠", text: "Dashboard" },
+    { to: "/home/homeoverview", icon: "📊", text: "Overview" },
+    { to: "/home/devices", icon: "💡", text: "Devices" },
+    { to: "/home/addroom", icon: "➕", text: "Add Room" },
+    { to: "/home/updateroomdata", icon: "⚙️", text: "Manage Rooms" },
+    { to: "/home/pets", icon: "�", text: "Pet Care" },
+    { to: "/home/addpet", icon: "➕", text: "Add Pet" },
+    { to: "/home/laserbeam", icon: "🚨", text: "Laser Boundary" },
+    { to: "/home/notification-settings", icon: "🔔", text: "Notifications" },
+    // Logout can remain a top-level route if it redirects away from the main app layout
+    // or you can make it /home/logout if you want it to be part of the protected flow
   ];
 
   return (
@@ -28,6 +31,7 @@ const SideBar = () => {
           <li className="nav-item mb-2" key={index}>
             <Link 
               to={link.to} 
+              // Ensure location.pathname correctly matches the full path for active styling
               className={`nav-link d-flex align-items-center rounded py-2 ${location.pathname === link.to ? 'active-sidebar-link' : 'text-dark'}`}
             >
               <span className="me-3 fs-5">{link.icon}</span> {/* Icon with margin */}

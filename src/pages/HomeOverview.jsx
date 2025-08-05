@@ -1,26 +1,24 @@
 // src/pages/HomeOverview.jsx
 import React, { useState, useEffect } from 'react';
-// >>> IMPORTANT: PLEASE CAREFULLY VERIFY THIS FIREBASE.JS FILE PATH <<<
-//
-// This path assumes 'firebase.js' is located directly in the 'src/' directory.
-// If your 'firebase.js' is in a different location (e.g., 'src/config/firebase.js'),
-// you MUST adjust this import path accordingly (e.g., `../config/firebase.js`).
-//
-import { db } from '../firebase.jsx';
-import { ref, onValue } from 'firebase/database';
+import { db } from '../firebase.jsx'; // Ensure this path is correct for your Firebase setup
+import { ref, onValue, update } from 'firebase/database';
 
 const HomeOverview = () => {
   const [roomsData, setRoomsData] = useState({});
   const [petsData, setPetsData] = useState({});
-  const [laserBoundaryData, setLaserBoundaryData] = useState(null); // State for laser boundary data
+  const [laserBoundaryData, setLaserBoundaryData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hallTemp, setHallTemp] = useState(null);
+  const [hallHumidity, setHallHumidity] = useState(null);
+  const [hallMotionStatus, setHallMotionStatus] = useState(null);
+  const [flameStatuses, setFlameStatuses] = useState([]);
+  const [isMotionDetectionOn, setIsMotionDetectionOn] = useState(true);
 
   useEffect(() => {
     let roomsLoaded = false;
     let petsLoaded = false;
-    let laserLoaded = false; // New flag for laser data
+    let laserLoaded = false;
 
-    // Function to set loading to false once all data sources are fetched
     const checkLoading = () => {
       if (roomsLoaded && petsLoaded && laserLoaded) {
         setLoading(false);
@@ -32,6 +30,16 @@ const HomeOverview = () => {
     const unsubscribeRooms = onValue(roomsRef, (snapshot) => {
       const data = snapshot.val() || {};
       setRoomsData(data);
+
+      const newFlameStatuses = [];
+      Object.entries(data).forEach(([roomId, room]) => {
+        if (room.status?.flameSensor) {
+          const roomName = room.name || `Room ${roomId.substring(0, 5)}...`;
+          newFlameStatuses.push({ roomName, status: room.status.flameSensor });
+        }
+      });
+      setFlameStatuses(newFlameStatuses);
+
       roomsLoaded = true;
       checkLoading();
     });
@@ -45,22 +53,35 @@ const HomeOverview = () => {
       checkLoading();
     });
 
-    // Fetch Laser Boundary Data
-    const laserRef = ref(db, 'houseProtection'); // Path for laser boundary
+    // Fetch House Protection Data (including hall conditions, laser boundary)
+    const laserRef = ref(db, 'houseProtection');
     const unsubscribeLaser = onValue(laserRef, (snapshot) => {
       const data = snapshot.val();
       setLaserBoundaryData(data);
+      // Update states from the houseProtection data
+      setHallTemp(data?.temperature ?? null);
+      setHallHumidity(data?.humidity ?? null);
+      setHallMotionStatus(data?.motion ?? null);
+      setIsMotionDetectionOn(data?.isMotionDetectionOn ?? true); // Default to true if not set
       laserLoaded = true;
       checkLoading();
     });
 
     return () => {
-      // Clean up listeners on component unmount
       unsubscribeRooms();
       unsubscribePets();
-      unsubscribeLaser(); // Clean up laser listener
+      unsubscribeLaser();
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []);
+
+  const toggleMotionDetection = () => {
+    const laserRef = ref(db, 'houseProtection');
+    const newStatus = !isMotionDetectionOn;
+    update(laserRef, { isMotionDetectionOn: newStatus })
+      .catch((error) => {
+        console.error("Failed to toggle motion detection status:", error);
+      });
+  };
 
   if (loading) {
     return <div className="text-center p-5 text-muted">Loading smart home overview...</div>;
@@ -69,28 +90,29 @@ const HomeOverview = () => {
   // --- Data Processing for Display ---
   const doorStatuses = [];
   const gasStatuses = [];
+  const petRfidStatuses = [];
   const motionStatuses = [];
-  const flameStatuses = [];
-  const petRfidStatuses = []; // Renamed for clarity on content
 
+  // Add Hall motion status from houseProtection
+  if (isMotionDetectionOn) {
+    if (hallMotionStatus !== null) {
+      motionStatuses.push({ roomName: 'Hall', status: hallMotionStatus, type: 'motion' });
+    }
+  }
+
+  // Get other door, gas, and motion statuses from rooms
   Object.entries(roomsData).forEach(([roomId, room]) => {
-    const roomName = room.name || `Room ${roomId.substring(0, 5)}...`; // Use room name or a clipped ID
+    const roomName = room.name || `Room ${roomId.substring(0, 5)}...`;
 
-    // Door Status: Only include if explicitly "Open" or "Closed"
     if (room.doorStatus && (room.doorStatus === "Open" || room.doorStatus === "Closed")) {
       doorStatuses.push({ roomName, status: room.doorStatus, type: 'door' });
     }
-    // Gas Status: Only include if explicitly "Detected" or "Normal"
     if (room.status?.gas && (room.status.gas === "Detected" || room.status.gas === "Normal")) {
       gasStatuses.push({ roomName, status: room.status.gas, type: 'gas' });
     }
-    // Motion Status: Only include if explicitly "Detected" or "No Motion"
-    if (room.status?.motion && (room.status.motion === "Detected" || room.status.motion === "No Motion")) {
+    // Only add motion from other rooms, not the hall which is now in houseProtection
+    if (room.name !== "hall" && room.status?.motion && (room.status.motion === "Detected" || room.status.motion === "No Motion")) {
       motionStatuses.push({ roomName, status: room.status.motion, type: 'motion' });
-    }
-    // Flame Sensor Status: Only include if explicitly "Detected" or "Normal"
-    if (room.status?.flameSensor && (room.status.flameSensor === "Detected" || room.status.flameSensor === "Normal")) {
-      flameStatuses.push({ roomName, status: room.status.flameSensor, type: 'flame' });
     }
   });
 
@@ -104,7 +126,7 @@ const HomeOverview = () => {
 
     if (typeof rfidDetected === 'boolean') {
       displayStatus = rfidDetected ? "Detected" : "Not Detected";
-      statusColor = rfidDetected ? "text-success" : "text-secondary";
+      statusColor = rfidDetected ? "text-success" : "text-secondary"; // Keep existing pet RFID colors
       if (rfidDetected && lastActivityTime) {
         activityInfo = ` (${new Date(lastActivityTime).toLocaleString()})`;
       }
@@ -119,24 +141,71 @@ const HomeOverview = () => {
     });
   });
 
-  // Laser Boundary Data for display
   const laserStatus = laserBoundaryData?.laserBoundaryStatus || "Unknown";
   const laserLastBreachTime = laserBoundaryData?.lastBreachTime || null;
   const isLaserBreached = laserStatus === "Breached";
   const displayLaserBreachTime = laserLastBreachTime ? new Date(laserLastBreachTime).toLocaleString() : "Never";
   const laserStatusIcon = isLaserBreached ? '🚨' : '✅';
   const laserStatusColorClass = isLaserBreached ? 'text-danger' : 'text-success';
+  // Determine if laser card needs glow
+  const laserGlowClass = isLaserBreached ? 'emergency-glow-red' : '';
   const laserCardColorClass = isLaserBreached ? 'bg-danger-subtle border-danger' : 'bg-success-subtle border-success';
 
+
+  // Determine if motion card needs glow
+  const isMotionDetectedInAnyRoom = motionStatuses.some(item => item.status === 'Detected');
+  const motionGlowClass = (isMotionDetectionOn && isMotionDetectedInAnyRoom) ? 'emergency-glow-orange' : '';
+
+  const motionCardStatus = isMotionDetectionOn ? (motionStatuses.length > 0 ? (
+    <ul className="list-unstyled mb-0">
+      {motionStatuses.map((item, index) => (
+        <li key={index} className="d-flex justify-content-between align-items-center py-1">
+          <span className="text-muted">{item.roomName}:</span>
+          {/* Motion status: Detected is warning, No Motion is success */}
+          <span className={`fw-bold ${item.status === 'Detected' ? 'text-warning' : 'text-success'}`}>
+            {item.status}
+          </span>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-muted">No motion status available.</p>
+  )) : (
+    <p className="text-info fw-bold">Motion detection is temporarily disabled.</p>
+  );
 
   return (
     <div className="flex-grow-1 p-4 bg-light" style={{ minHeight: '100vh' }}>
       <h2 className="mb-5 text-primary fw-bold">🏡 Smart Home Overview</h2>
 
       <div className="row g-4">
-        {/* Door Status Card */}
+        {/* Hall Temperature and Humidity Card */}
         <div className="col-md-6 col-lg-4">
           <div className="card h-100 shadow-lg rounded-xl border-0">
+            <div className="card-body p-4">
+              <h5 className="card-title text-primary mb-3 fw-bold">🌡️ Hall Conditions</h5>
+              {hallTemp !== null && hallHumidity !== null ? (
+                <ul className="list-unstyled mb-0">
+                  <li className="d-flex justify-content-between align-items-center py-1">
+                    <span className="text-muted">Temperature:</span>
+                    <span className="fw-bold text-success">{hallTemp}°C</span>
+                  </li>
+                  <li className="d-flex justify-content-between align-items-center py-1">
+                    <span className="text-muted">Humidity:</span>
+                    <span className="fw-bold text-success">{hallHumidity}%</span>
+                  </li>
+                </ul>
+              ) : (
+                <p className="text-muted">No hall temperature or humidity data available.</p>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Door Status Card */}
+        <div className="col-md-6 col-lg-4">
+          {/* Apply glow if any door is open */}
+          <div className={`card h-100 shadow-lg rounded-xl border-0 ${doorStatuses.some(item => item.status === 'Open') ? 'emergency-glow-red' : ''}`}>
             <div className="card-body p-4">
               <h5 className="card-title text-primary mb-3 fw-bold">🚪 Door Status</h5>
               {doorStatuses.length > 0 ? (
@@ -144,6 +213,7 @@ const HomeOverview = () => {
                   {doorStatuses.map((item, index) => (
                     <li key={index} className="d-flex justify-content-between align-items-center py-1">
                       <span className="text-muted">{item.roomName}:</span>
+                      {/* Door status: Open is danger, Closed is success */}
                       <span className={`fw-bold ${item.status === 'Open' ? 'text-danger' : 'text-success'}`}>
                         {item.status}
                       </span>
@@ -159,7 +229,8 @@ const HomeOverview = () => {
 
         {/* Gas Status Card */}
         <div className="col-md-6 col-lg-4">
-          <div className="card h-100 shadow-lg rounded-xl border-0">
+          {/* Apply glow if gas is detected in any room */}
+          <div className={`card h-100 shadow-lg rounded-xl border-0 ${gasStatuses.some(item => item.status === 'Detected') ? 'emergency-glow-red' : ''}`}>
             <div className="card-body p-4">
               <h5 className="card-title text-primary mb-3 fw-bold">🔥 Gas Status</h5>
               {gasStatuses.length > 0 ? (
@@ -167,6 +238,7 @@ const HomeOverview = () => {
                   {gasStatuses.map((item, index) => (
                     <li key={index} className="d-flex justify-content-between align-items-center py-1">
                       <span className="text-muted">{item.roomName}:</span>
+                      {/* Gas status: Detected is danger, Normal is success */}
                       <span className={`fw-bold ${item.status === 'Detected' ? 'text-danger' : 'text-success'}`}>
                         {item.status}
                       </span>
@@ -182,30 +254,25 @@ const HomeOverview = () => {
 
         {/* Motion Status Card */}
         <div className="col-md-6 col-lg-4">
-          <div className="card h-100 shadow-lg rounded-xl border-0">
+          {/* Apply glow based on motion detection status and if motion is detected */}
+          <div className={`card h-100 shadow-lg rounded-xl border-0 ${motionGlowClass}`}>
             <div className="card-body p-4">
               <h5 className="card-title text-primary mb-3 fw-bold">🚶 Motion Status</h5>
-              {motionStatuses.length > 0 ? (
-                <ul className="list-unstyled mb-0">
-                  {motionStatuses.map((item, index) => (
-                    <li key={index} className="d-flex justify-content-between align-items-center py-1">
-                      <span className="text-muted">{item.roomName}:</span>
-                      <span className={`fw-bold ${item.status === 'Detected' ? 'text-warning' : 'text-success'}`}>
-                        {item.status}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted">No motion status available.</p>
-              )}
+              {motionCardStatus}
+              <button 
+                onClick={toggleMotionDetection} 
+                className={`btn btn-sm mt-3 ${isMotionDetectionOn ? 'btn-warning' : 'btn-success'}`}
+              >
+                {isMotionDetectionOn ? 'Disable Motion Detection' : 'Enable Motion Detection'}
+              </button>
             </div>
           </div>
         </div>
 
         {/* Flame Sensor Status Card */}
         <div className="col-md-6 col-lg-4">
-          <div className="card h-100 shadow-lg rounded-xl border-0">
+          {/* Apply glow if flame is detected in any room */}
+          <div className={`card h-100 shadow-lg rounded-xl border-0 ${flameStatuses.some(item => item.status === 'Detected') ? 'emergency-glow-red' : ''}`}>
             <div className="card-body p-4">
               <h5 className="card-title text-primary mb-3 fw-bold">🔥 Flame Sensor Status</h5>
               {flameStatuses.length > 0 ? (
@@ -213,6 +280,7 @@ const HomeOverview = () => {
                   {flameStatuses.map((item, index) => (
                     <li key={index} className="d-flex justify-content-between align-items-center py-1">
                       <span className="text-muted">{item.roomName}:</span>
+                      {/* Flame status: Detected is danger, Normal is success */}
                       <span className={`fw-bold ${item.status === 'Detected' ? 'text-danger' : 'text-success'}`}>
                         {item.status}
                       </span>
@@ -226,9 +294,11 @@ const HomeOverview = () => {
           </div>
         </div>
 
-        {/* Laser Boundary Status Card (NEW) */}
+        {/* Laser Boundary Status Card */}
         <div className="col-md-6 col-lg-4">
-          <div className={`card h-100 shadow-lg rounded-xl border-0 ${laserCardColorClass}`}>
+          {/* Card color and border dynamically change based on laser breach status */}
+          {/* Apply glow based on laser breach status */}
+          <div className={`card h-100 shadow-lg rounded-xl border-0 ${laserCardColorClass} ${laserGlowClass}`}>
             <div className="card-body p-4">
               <h5 className={`card-title fw-bold d-flex align-items-center ${laserStatusColorClass} mb-3`}>
                 <span className="me-2 fs-4">{laserStatusIcon}</span>
@@ -247,7 +317,7 @@ const HomeOverview = () => {
                 <p className="text-muted fw-bold mt-2">Laser boundary status unknown or not configured.</p>
               )}
               <small className="form-text text-info d-block mt-2">
-                 For detailed control, navigate to 'Laser Boundary' page.
+                  For detailed control, navigate to 'Laser Boundary' page.
               </small>
             </div>
           </div>
@@ -255,6 +325,7 @@ const HomeOverview = () => {
 
         {/* Pet RFID Detected Status Card (Updated Logic) */}
         <div className="col-md-6 col-lg-4">
+          {/* No glow for pet RFID as it's not typically an "emergency" */}
           <div className="card h-100 shadow-lg rounded-xl border-0">
             <div className="card-body p-4">
               <h5 className="card-title text-primary mb-3 fw-bold">🐾 Pet RFID Status</h5>
@@ -277,7 +348,7 @@ const HomeOverview = () => {
         </div>
       </div>
     </div>
-  );
+  );  
 };
 
 export default HomeOverview;

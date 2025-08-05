@@ -4,7 +4,9 @@
   padding: 2rem;
   text-align: center;
 }
-
+body {
+  font-family: 'Inter', sans-serif;
+}
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -39,4 +41,32 @@
 
 .read-the-docs {
   color: #888;
+}
+/* src/App.css or src/MainLayout.css */
+
+/* Set the root elements to 100% height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents the whole page from scrolling */
+}
+
+/* Main container for the app */
+.app-container {
+  display: flex;
+  height: 100vh; /* This is the key. It sets the container to full viewport height. */
+}
+
+/* Sidebar container */
+.sidebar-container {
+  width: 280px; /* Or whatever fixed width you prefer */
+  flex-shrink: 0; /* Prevents the sidebar from shrinking */
+  background-color: #e3f2fd; /* Example color */
+}
+
+/* Main content container */
+.content-container {
+  flex-grow: 1; /* Allows the content area to fill the remaining space */
+  overflow-y: auto; /* This is the most crucial part. It adds a vertical scrollbar when content overflows. */
 }

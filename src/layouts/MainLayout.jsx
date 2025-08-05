@@ -1,25 +1,30 @@
 // src/components/MainLayout.jsx
 import React from 'react';
-import SideBar from './SideBar'; // Assuming SideBar is in the same 'components' folder
+import { Outlet } from 'react-router-dom';
+import SideBar from '../components/SideBar'; // Ensure SideBar is correctly imported
+import './mainLayout.css'; // Import the main layout CSS for structural styles
 
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   return (
-    <div className="container-fluid g-0"> {/* g-0 removes gutter padding */}
-      <div className="row flex-nowrap vh-100"> {/* flex-nowrap prevents wrapping, vh-100 ensures full height */}
-        {/* Sidebar Column */}
-        {/* bg-sidebar is our custom class from sidebar.css */}
-        {/* rounded-end-4 gives a subtle rounded corner on the right edge */}
-        {/* shadow-sm adds a light shadow for depth */}
-        <div className="col-auto col-md-3 col-xl-2 px-3 bg-sidebar border-end rounded-end-4 shadow-sm">
-          <SideBar />
-        </div>
+    // This is the main container for the entire application layout.
+    // 'app-container' class applies flexbox and ensures 100vh height.
+    <div className="app-container">
+      {/* Sidebar container:
+          'sidebar-container' class sets its fixed width and prevents shrinking.
+          'border-end' adds a subtle right border for visual separation. */}
+      <div className="sidebar-container border-end">
+        <SideBar />
+      </div>
 
-        {/* Main Content Column */}
-        {/* flex-grow-1 makes content take remaining width */}
-        {/* p-4 adds consistent padding around content */}
-        <div className="col py-3 px-4 overflow-auto flex-grow-1">
-          {children} {/* This is where your HomeOverview or other pages will render */}
-        </div>
+      {/* Main content area:
+          'content-container' class allows it to grow and fill remaining space,
+          and crucially, enables vertical scrolling if content overflows.
+          'bg-light' provides a light background. */}
+      <div className="content-container bg-light">
+        {/* <Outlet> is where the content of the nested routes will be rendered.
+            For example, if the path is /home/dashboard, the Dashboard component
+            will be rendered here. */}
+        <Outlet /> 
       </div>
     </div>
   );
