@@ -78,3 +78,150 @@ html, body, #root {
 .card.emergency-glow-orange {
   animation: pulse-orange-glow 2s infinite ease-in-out; /* Apply the orange pulse animation */
 }
+
+/* --- New Card Background Gradients --- */
+
+/* General card gradient */
+.cute-card-bg-gradient {
+  background: linear-gradient(145deg, #ffffff, #f0f2f5);
+}
+
+/* Gradient for pet-related cards */
+.cute-card-bg-gradient-pets {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+}
+
+/* Gradient for alert-related cards */
+.cute-card-bg-gradient-alerts {
+  background: linear-gradient(145deg, #fffafa, #fdf5f5); /* Slightly reddish for alerts */
+}
+
+/* Add a subtle hover effect for cards */
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Custom styles for buttons to make them more visually appealing */
+.cute-btn {
+  background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.cute-btn:hover {
+  background-position: right center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.cute-delete-btn {
+  background-color: #dc3545; /* Bootstrap danger red */
+  border-color: #dc3545;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.cute-delete-btn:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+  transform: translateY(-1px);
+}
+
+/* Animation for buttons on hover */
+.animate-pulse-on-hover:hover {
+  animation: pulse-effect 0.5s infinite alternate;
+}
+
+@keyframes pulse-effect {
+  from {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  to {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Custom switch styling for a more modern look */
+.form-check-input.cute-switch {
+  width: 2.5em; /* Make it wider */
+  height: 1.3em; /* Make it taller */
+  border-radius: 1em; /* Make it pill-shaped */
+  background-color: #ced4da; /* Default off state color */
+  border: 1px solid #ced4da;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.form-check-input.cute-switch:checked {
+  background-color: #28a745; /* Green for on state */
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25); /* Subtle glow */
+}
+
+.form-check-input.cute-switch:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Standard focus ring */
+  outline: 0;
+}
+
+/* Custom select styling */
+.cute-select {
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.cute-select:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 0 0.2rem rgba(102, 175, 233, 0.25);
+  outline: 0;
+}
+
+/* Animations for room name and alerts */
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cute-alert-item {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both infinite;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
