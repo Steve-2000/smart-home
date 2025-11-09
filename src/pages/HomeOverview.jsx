@@ -31,11 +31,29 @@ const HomeOverview = () => {
       const data = snapshot.val() || {};
       setRoomsData(data);
 
+      // Normalize flame sensor readings to "Detected" / "Normal"
       const newFlameStatuses = [];
       Object.entries(data).forEach(([roomId, room]) => {
-        if (room.status?.flameSensor) {
-          const roomName = room.name || `Room ${roomId.substring(0, 5)}...`;
-          newFlameStatuses.push({ roomName, status: room.status.flameSensor });
+        const raw = room?.status?.flameSensor;
+        if (raw !== undefined && raw !== null) {
+          let statusLabel = 'Unknown';
+
+          if (typeof raw === 'boolean') {
+            statusLabel = raw ? 'Detected' : 'Normal';
+          } else if (typeof raw === 'number') {
+            // treat any positive / non-zero as detected
+            statusLabel = raw > 0 ? 'Detected' : 'Normal';
+          } else if (typeof raw === 'string') {
+            const r = raw.trim().toLowerCase();
+            if (r === 'true' || r === '1' || r.includes('detec')) statusLabel = 'Detected';
+            else if (r === 'false' || r === '0' || r.includes('norm')) statusLabel = 'Normal';
+            else statusLabel = raw; // preserve original if unrecognized
+          } else {
+            statusLabel = String(raw);
+          }
+
+          const roomName = room?.name || `Room ${roomId.substring(0, 5)}...`;
+          newFlameStatuses.push({ roomName, status: statusLabel });
         }
       });
       setFlameStatuses(newFlameStatuses);

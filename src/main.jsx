@@ -12,12 +12,13 @@ import Dashboard from './pages/Dashboard.jsx';
 import HomeOverview from './pages/HomeOverview.jsx'; 
 import Addroom from './pages/Addroom.jsx';
 import UpdateRoomData from './components/UpdateRoomData.jsx';
+import HealthTips from './pages/HealthTips.jsx';
 import Devices from './pages/Devices.jsx';
 import AddPet from './pages/AddPet.jsx';
 import PetCare from './pages/PetCare.jsx';
 import NotificationSettings from './pages/NotificationSettings.jsx';
 import LaserBoundaryControl from './pages/LaserBoundaryControl.jsx';
-
+import ContactForm from './components/ContactForm.jsx';
 const router = createBrowserRouter([
   {
     // This is the root path for your login/registration.
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
         path: 'homeoverview', 
         element: <HomeOverview />,
       },
+        {
+    path: 'contact',
+    element:<ContactForm />,
+  },
       {
         path: 'addroom', 
         element: <Addroom />,
@@ -85,6 +90,11 @@ const router = createBrowserRouter([
         path: 'notification-settings', 
         element: <NotificationSettings />,
       },
+         {
+    path: 'HealthTips',
+    element: <HealthTips />,
+  },
+
       {
         path: 'laserbeam', 
         element: <LaserBoundaryControl />,
@@ -95,6 +105,8 @@ const router = createBrowserRouter([
     path: '/logout',
     element: <Logout />,
   },
+
+
 ]);
 
 createRoot(document.getElementById('root')).render(
