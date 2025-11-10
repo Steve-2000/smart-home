@@ -161,7 +161,7 @@ const Dashboard = () => {
                 "service_c74h84k", 
                 "template_ndlemde",
                 templateParams, 
-                "TUaWuGFKzMEYeVvAA1" //need remove
+                "TUaWuGFKzMEYeVvAA" //need remove
             );
             console.log("Email alert sent successfully!", result.text);
         } catch (error) {
